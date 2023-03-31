@@ -37,3 +37,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+in/commodity_trade_statistics_data.csv
+in/transactions_amostra.csv
