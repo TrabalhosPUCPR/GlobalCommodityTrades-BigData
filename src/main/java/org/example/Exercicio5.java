@@ -2,6 +2,7 @@ package org.example;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -22,14 +23,14 @@ public class Exercicio5 {
         job.setMapperClass(BackTransactionsMapper.class);
         job.setReducerClass(BackTransactionsReducer.class);
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(FloatWritable.class);
+        job.setMapOutputValueClass(AvgWritable.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(FloatWritable.class);
+        job.setOutputValueClass(AvgWritable.class);
         FileOutputFormat.setOutputPath(job, output);
         return job;
     }
 
-    public static class BackTransactionsMapper extends Mapper<Object, Text, Text, FloatWritable> {
+    public static class BackTransactionsMapper extends Mapper<Object, Text, Text, AvgWritable> {
         private boolean firstLine = true;
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -42,39 +43,34 @@ public class Exercicio5 {
             String unit = fields[7];
             String year = fields[1];
 
-            float commodity_usd = Float.parseFloat(fields[5]);
-            context.write(verbose(unit, year), new FloatWritable(commodity_usd));
+            double commodity_usd = Double.parseDouble(fields[5]);
+            context.write(verbose(unit, year), new AvgWritable(commodity_usd, 1));
         }
     }
 
-    public static class BackTransactionsReducer extends Reducer<Text, FloatWritable, Text, Text> {
-        private boolean firstProcess = true;
+    public static class BackTransactionsReducer extends Reducer<Text, AvgWritable, Text, Text> {
+        //private boolean firstProcess = true;
         @Override
-        protected void reduce(Text key, Iterable<FloatWritable> values, Reducer<Text, FloatWritable, Text, Text>.Context context) throws IOException, InterruptedException {
-            int count = 0;
+        protected void reduce(Text key, Iterable<AvgWritable> values, Reducer<Text, AvgWritable, Text, Text>.Context context) throws IOException, InterruptedException {
+            double count = 0;
             int total = 0;
-            Float max = (float) 0.0;
-            Float min = (float) 0.0;
-            for(FloatWritable i : values){
-                count += i.get();
-                total += 1;
-                if(firstProcess){
-                    firstProcess = false;
-                    min = i.get();
-                    max = i.get();
-                }else{
-                    if(i.get() > max){
-                        max = i.get();
-                    }else if(min > i.get()){
-                        min = i.get();
-                    }
+            Double max = Double.MIN_VALUE;
+            Double min =  Double.MAX_VALUE;
+            for(AvgWritable i : values){
+                count += i.getSomaValues();
+                total += i.getN();
+                if(i.getSomaValues() > max){
+                    max = i.getSomaValues();
                 }
-
+                if(i.getSomaValues() < min){
+                    min = i.getSomaValues();
+                }
             }
-            Float mean = (float) count / total;
 
 
+            Double mean = count / total;
             context.write(key, Answer( max.toString(), min.toString(), mean.toString()));
+            //firstProcess = true;
         }
     }
 
@@ -88,5 +84,4 @@ public class Exercicio5 {
         return new Text(value);
     }
 }
-
 
