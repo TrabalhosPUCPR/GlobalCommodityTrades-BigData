@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Exercicio2;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -10,9 +10,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public class Exercicio2 {
 
@@ -22,7 +19,7 @@ public class Exercicio2 {
         job.setJarByClass(Exercicio2.class);
         job.setMapperClass(BackTransactionsMapper.class);
         job.setReducerClass(BackTransactionsReducer.class);
-        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputKeyClass(StringDoubleKeys.class);
         job.setMapOutputValueClass(IntWritable.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
@@ -30,7 +27,7 @@ public class Exercicio2 {
         return job;
     }
 
-    public static class BackTransactionsMapper extends Mapper<Object, Text, Text, IntWritable> {
+    public static class BackTransactionsMapper extends Mapper<Object, Text, StringDoubleKeys, IntWritable> {
         private boolean firstLine = true;
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -39,22 +36,20 @@ public class Exercicio2 {
                 return;
             }
             String[] fields = value.toString().split(";");
-
             String year = fields[1];
             String flow = fields[4];
-            context.write(new Text(year+" "+flow), new IntWritable(1));
+            context.write(new StringDoubleKeys(year, flow), new IntWritable(1));
         }
     }
 
-    public static class BackTransactionsReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
-
+    public static class BackTransactionsReducer extends Reducer<StringDoubleKeys, IntWritable, Text, IntWritable> {
         @Override
-        protected void reduce(Text key, Iterable<IntWritable> values, Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+        protected void reduce(StringDoubleKeys key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int count = 0;
             for(IntWritable i : values){
                 count += i.get();
             }
-            context.write(key, new IntWritable(count));
+            context.write(new Text(key.toString()), new IntWritable(count));
         }
     }
 

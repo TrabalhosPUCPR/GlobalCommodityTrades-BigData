@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Exercicio1;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -44,7 +44,7 @@ public class Exercicio1 {
 
     public static class BackTransactionsReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
         @Override
-        protected void reduce(Text key, Iterable<IntWritable> values, Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int count = 0;
             for(IntWritable i : values){
                 count += i.get();
