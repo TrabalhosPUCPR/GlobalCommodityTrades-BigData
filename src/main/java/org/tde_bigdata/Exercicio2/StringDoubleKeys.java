@@ -1,6 +1,6 @@
-package org.example.Exercicio2;
+package org.tde_bigdata.Exercicio2;
 
-import org.example.GenericWritable;
+import org.tde_bigdata.GenericWritable;
 
 public class StringDoubleKeys extends GenericWritable {
 

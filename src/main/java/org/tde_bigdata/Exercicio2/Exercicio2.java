@@ -1,4 +1,4 @@
-package org.example.Exercicio2;
+package org.tde_bigdata.Exercicio2;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;

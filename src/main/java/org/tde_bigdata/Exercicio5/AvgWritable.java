@@ -1,6 +1,6 @@
-package org.example.Exercicio5;
+package org.tde_bigdata.Exercicio5;
 
-import org.example.GenericWritable;
+import org.tde_bigdata.GenericWritable;
 
 public class AvgWritable extends GenericWritable {
     public double getSomaValues() {

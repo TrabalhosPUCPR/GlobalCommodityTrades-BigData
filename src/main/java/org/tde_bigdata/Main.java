@@ -1,4 +1,4 @@
-package org.example;
+package org.tde_bigdata;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -6,16 +6,16 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.log4j.BasicConfigurator;
-import org.example.Exercicio1.Exercicio1;
-import org.example.Exercicio2.Exercicio2;
-import org.example.Exercicio5.Exercicio5;
+import org.tde_bigdata.Exercicio1.Exercicio1;
+import org.tde_bigdata.Exercicio2.Exercicio2;
+import org.tde_bigdata.Exercicio5.Exercicio5;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main {
-    private static Path input = new Path("in/transactions_amostra.csv");
+    private static final Path input = new Path("in/transactions_amostra.csv");
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         BasicConfigurator.configure();
 

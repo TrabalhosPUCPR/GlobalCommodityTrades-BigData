@@ -1,4 +1,4 @@
-package org.example;
+package org.tde_bigdata;
 
 import org.apache.hadoop.io.WritableComparable;
 
