@@ -1,4 +1,4 @@
-package TDE1;
+package org.tde_bigdata;
 
 public interface ContactenateMPs {
 }
