@@ -4,6 +4,7 @@ package org.tde_bigdata.Exercicio4;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.GenericWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -22,15 +23,17 @@ public class Exercicio4 {
         job.setJarByClass(Exercicio4.class);
         job.setMapperClass(BackTransactionsMapper.class);
         job.setReducerClass(BackTransactionsReducer.class);
-        job.setMapOutputKeyClass(Text.class);
+
+        job.setMapOutputKeyClass(MultiStringKeys.class);
         job.setMapOutputValueClass(FloatWritable.class);
+
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(FloatWritable.class);
         FileOutputFormat.setOutputPath(job, output);
         return job;
     }
 
-    public static class BackTransactionsMapper extends Mapper<Object, Text, Text, FloatWritable> {
+    public static class BackTransactionsMapper extends Mapper<Object, Text, MultiStringKeys, FloatWritable> {
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] fields = value.toString().split(";");
@@ -45,26 +48,22 @@ public class Exercicio4 {
             float commodity_usd = Float.parseFloat(fields[5]);
 
             if(!Objects.equals(flow, "Export") || !Objects.equals(country, "Brazil")) return;
-            context.write(verbose(unit, year, category), new FloatWritable(commodity_usd));
+            context.write(new MultiStringKeys(unit, year, category), new FloatWritable(commodity_usd));
         }
     }
 
-    public static class BackTransactionsReducer extends Reducer<Text, FloatWritable, Text, FloatWritable> {
+    public static class BackTransactionsReducer extends Reducer<MultiStringKeys, FloatWritable, Text, FloatWritable> {
         @Override
-        protected void reduce(Text key, Iterable<FloatWritable> values, Reducer<Text, FloatWritable, Text, FloatWritable>.Context context) throws IOException, InterruptedException {
+        protected void reduce(MultiStringKeys key, Iterable<FloatWritable> values, Reducer<MultiStringKeys, FloatWritable, Text, FloatWritable>.Context context) throws IOException, InterruptedException {
             int count = 0;
             int total = 0;
             for(FloatWritable i : values){
                 count += i.get();
                 total += 1;
             }
-            context.write(key, new FloatWritable((float) count / total));
+            context.write(new Text(key.toString()), new FloatWritable((float) count / total));
         }
     }
-
-    public static Text verbose(String unit, String year, String category){
-        String value = "unit = " + unit + " Year = " + year + " Category = " + category;
-        return new Text(value);
-    }
 }
+
 
