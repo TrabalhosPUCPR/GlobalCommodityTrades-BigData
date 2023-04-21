@@ -28,14 +28,10 @@ public class Exercicio2 {
     }
 
     public static class BackTransactionsMapper extends Mapper<Object, Text, StringDoubleKeys, IntWritable> {
-        private boolean firstLine = true;
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            if(firstLine){
-                firstLine = false;
-                return;
-            }
             String[] fields = value.toString().split(";");
+            if(fields[0].equals("country_or_area")) return;
             String year = fields[1];
             String flow = fields[4];
             context.write(new StringDoubleKeys(year, flow), new IntWritable(1));

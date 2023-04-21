@@ -1,4 +1,4 @@
-package org.tde_bigdata;
+package org.tde_bigdata.Exercicio4;
 
 
 import org.apache.hadoop.conf.Configuration;
@@ -31,14 +31,11 @@ public class Exercicio4 {
     }
 
     public static class BackTransactionsMapper extends Mapper<Object, Text, Text, FloatWritable> {
-        private boolean firstLine = true;
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            if(firstLine){
-                firstLine = false;
-                return;
-            }
             String[] fields = value.toString().split(";");
+
+            if(fields[0].equals("country_or_area")) return;
 
             String unit = fields[7];
             String year = fields[1];

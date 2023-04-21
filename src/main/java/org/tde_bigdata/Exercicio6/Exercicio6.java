@@ -53,14 +53,10 @@ public class Exercicio6 implements ContactenateMPs {
     }
 
     public static class MapEtapaA extends Mapper<Object, Text, Text, AvgWritable> {
-        private boolean firstLine = true;
         public void map(Object key, Text value, Context con)
                 throws IOException, InterruptedException {
-            if(firstLine){
-                firstLine = false;
-                return;
-            }
             String[] fields = value.toString().split(";");
+            if(fields[0].equals("country_or_area")) return;
             String country = fields[0];
             double commodity_usd = Double.parseDouble(fields[5]);
             String flow = fields[4];
@@ -85,8 +81,6 @@ public class Exercicio6 implements ContactenateMPs {
 
 
     public static class MapEtapaB extends Mapper<Object, Text, Text, DoubleWritable> {
-        private boolean firstLine = true;
-        private double max = 0;
         public void map(Object key, Text value, Context con)
                 throws IOException, InterruptedException {
             String[] fields = value.toString().split(":");
