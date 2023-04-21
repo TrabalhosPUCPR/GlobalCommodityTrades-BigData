@@ -9,6 +9,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.tde_bigdata.Exercicio1.Exercicio1;
 import org.tde_bigdata.Exercicio2.Exercicio2;
 import org.tde_bigdata.Exercicio5.Exercicio5;
+import org.tde_bigdata.Exercicio6.Exercicio6;
 
 import java.io.File;
 import java.io.IOException;
