@@ -19,10 +19,15 @@ public class Exercicio2 {
         job.setJarByClass(Exercicio2.class);
         job.setMapperClass(BackTransactionsMapper.class);
         job.setReducerClass(BackTransactionsReducer.class);
+
         job.setMapOutputKeyClass(StringDoubleKeys.class);
         job.setMapOutputValueClass(IntWritable.class);
+
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
+
+        job.setCombinerClass(Combiner.class);
+
         FileOutputFormat.setOutputPath(job, output);
         return job;
     }
@@ -35,6 +40,17 @@ public class Exercicio2 {
             String year = fields[1];
             String flow = fields[4];
             context.write(new StringDoubleKeys(year, flow), new IntWritable(1));
+        }
+    }
+
+    public static class Combiner extends Reducer<StringDoubleKeys, IntWritable, StringDoubleKeys, IntWritable>{
+        @Override
+        protected void reduce(StringDoubleKeys key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int count = 0;
+            for(IntWritable i : values){
+                count += i.get();
+            }
+            context.write(key, new IntWritable(count));
         }
     }
 
