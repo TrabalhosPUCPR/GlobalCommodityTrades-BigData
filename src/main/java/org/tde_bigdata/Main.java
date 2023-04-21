@@ -25,11 +25,11 @@ public class Main {
         FileUtils.deleteDirectory(new File("output/")); // para nao precisar deletar na mao toda vez
         ArrayList<Job> exercicios = new ArrayList<>();
 
-        //exercicios.add(Exercicio1.setupJob(c));
+        exercicios.add(Exercicio1.setupJob(c));
         //exercicios.add(Exercicio2.setupJob(c));
         //exercicios.add(Exercicio4.setupJob(c));
         //exercicios.add(Exercicio5.setupJob(c));
-        exercicios.add(Exercicio6.setupJob(c));
+//        exercicios.add(Exercicio6.setupJob(c));
 
         for(Job j : exercicios){
             launchJob(j);

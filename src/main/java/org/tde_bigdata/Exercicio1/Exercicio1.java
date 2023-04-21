@@ -24,21 +24,31 @@ public class Exercicio1 {
         job.setMapOutputValueClass(IntWritable.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
+
+        job.setCombinerClass(Combiner.class);
+
         FileOutputFormat.setOutputPath(job, output);
         return job;
     }
 
     public static class BackTransactionsMapper extends Mapper<Object, Text, Text, IntWritable> {
-        private boolean firstLine = true;
+
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            if(firstLine){
-                firstLine = false;
-                return;
-            }
             String country = value.toString().split(";")[0];
             if(!Objects.equals(country, "Brazil")) return;
             context.write(new Text(country), new IntWritable(1));
+        }
+    }
+
+    public static class Combiner extends Reducer<Text, IntWritable, Text, IntWritable>{
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int count = 0;
+            for(IntWritable i : values){
+                count += i.get();
+            }
+            context.write(key, new IntWritable(count));
         }
     }
 
