@@ -23,6 +23,9 @@ type.
 
 
 Given your knowledge and skills in Java and MapReduce, for each item above, provide:
-1. The source code for solving the problem using MapReduce programming
-2. The source code must be implemented using the Combiner function
-3. The result of your code run in a separate text file (.txt). If more than 5 rows of results are available, you must report only the 5 first rows of such result.
+- [X] 1. The source code for solving the problem using MapReduce programming
+- [X] 2. The source code must be implemented using the Combiner function
+- [ ] 3. The result of your code run in a separate text file (.txt). If more than 5 rows of results are available, you must report only the 5 first rows of such result.
+
+Additional Requirements:
+- [ ] 4. Comments in Code
