@@ -18,7 +18,7 @@ in Brazil;
 - [X] 6. (Hard) The country with the largest average commodity price in the Export flow;
  - Important: a single country must be output in this solution!
 
-- [ ] 7. (Hard) The most commercialized commodity (summing the quantities) in 2016, per flow
+- [X] 7. (Hard) The most commercialized commodity (summing the quantities) in 2016, per flow
 type.
 
 
