@@ -41,7 +41,7 @@ public class Exercicio3 implements Exercicio {
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] fields = value.toString().split(";");
 
-            if(fields[0].equals("country_or_area")) return;
+            if(fields[0].equals("country_or_area")) return; // if its first line returns
 
             String year = fields[1];
             double commodity_usd = Double.parseDouble(fields[5]);
@@ -55,7 +55,7 @@ public class Exercicio3 implements Exercicio {
         protected void reduce(Text key, Iterable<AvgWritable> values, Context context) throws IOException, InterruptedException {
             double count = 0;
             int total = 0;
-            for(AvgWritable i : values){
+            for(AvgWritable i : values){ // sums up all the value and the total amount of commodities
                 count += i.getSomaValues();
                 total += i.getN();
             }
@@ -66,13 +66,13 @@ public class Exercicio3 implements Exercicio {
     public static class BackTransactionsReducer extends Reducer<Text, AvgWritable, Text, DoubleWritable> {
         @Override
         protected void reduce(Text key, Iterable<AvgWritable> values, Context context) throws IOException, InterruptedException {
-            double count = 0;
+            double count = 0; // same as combiner
             int total = 0;
             for(AvgWritable i : values){
                 count += i.getSomaValues();
                 total += i.getN();
             }
-            context.write(new Text(key.toString()), new DoubleWritable( count / total));
+            context.write(key, new DoubleWritable( count / total));
         }
     }
 }

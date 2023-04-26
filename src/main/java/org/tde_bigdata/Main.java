@@ -34,16 +34,16 @@ public class Main {
         exercicios.add(new Exercicio6(c));
         exercicios.add(new Exercicio7(c));
 
-        int exercicio = 1;
+        int jobN = 1;
         for(Exercicio e : exercicios){
             try{
                 e.launch(c, input);
             }catch (Exception ex){
-                System.err.println("\n\nERRO NO EXERCICIO " + exercicio + ":\n");
+                System.err.println("\n\nERROR IN JOB " + jobN + ":\n");
                 ex.printStackTrace();
                 return;
             }
-            exercicio++;
+            jobN++;
         }
     }
 

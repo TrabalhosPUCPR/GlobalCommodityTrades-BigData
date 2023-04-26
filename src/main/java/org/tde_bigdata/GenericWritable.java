@@ -9,7 +9,13 @@ import java.util.Arrays;
 
 public abstract class GenericWritable implements WritableComparable<GenericWritable> {
 
+    /**
+     * Array of all the objects to be stored in the writable
+     */
     public Object[] objects;
+    /**
+     * Splittler to be used when converting all the objects to string
+     */
     public String splitter = " ";
     public GenericWritable(Object... objects){
         this.objects = objects;
