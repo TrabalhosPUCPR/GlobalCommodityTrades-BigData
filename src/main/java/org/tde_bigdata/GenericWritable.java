@@ -10,6 +10,7 @@ import java.util.Arrays;
 public abstract class GenericWritable implements WritableComparable<GenericWritable> {
 
     public Object[] objects;
+    public String splitter = " ";
     public GenericWritable(Object... objects){
         this.objects = objects;
     }
@@ -20,7 +21,7 @@ public abstract class GenericWritable implements WritableComparable<GenericWrita
         StringBuilder s = new StringBuilder();
         for(Object o : objects){
             s.append(o);
-            s.append(" ");
+            s.append(splitter);
         }
         return s.toString();
     }

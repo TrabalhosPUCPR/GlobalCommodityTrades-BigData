@@ -8,12 +8,14 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.tde_bigdata.Exercicio;
 
 import java.io.IOException;
 
-public class Exercicio2 {
+public class Exercicio2 implements Exercicio {
 
-    public static Job setupJob(Configuration c) throws IOException {
+    @Override
+    public Job setupJob(Configuration c) throws IOException {
         Job job = new Job(c, "Ex2");
         Path output = new Path("output/outputEX2");
         job.setJarByClass(Exercicio2.class);

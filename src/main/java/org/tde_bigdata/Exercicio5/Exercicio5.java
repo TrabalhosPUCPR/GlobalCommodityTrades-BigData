@@ -7,12 +7,14 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.tde_bigdata.Exercicio;
 
 import java.io.IOException;
 
-public class Exercicio5 {
+public class Exercicio5 implements Exercicio {
 
-    public static Job setupJob(Configuration c) throws IOException {
+    @Override
+    public Job setupJob(Configuration c) throws IOException {
         Job job = new Job(c, "Ex5");
         Path output = new Path("output/outputEX5");
         job.setJarByClass(Exercicio5.class);
@@ -22,6 +24,7 @@ public class Exercicio5 {
         job.setMapOutputValueClass(AvgWritable.class);
         job.setOutputKeyClass(MultiStringKeys.class);
         job.setOutputValueClass(MultiStringKeys.class);
+        job.setCombinerClass(Combiner.class);
         FileOutputFormat.setOutputPath(job, output);
         return job;
     }
@@ -40,8 +43,21 @@ public class Exercicio5 {
         }
     }
 
+    public static class Combiner extends Reducer<MultiStringKeys, AvgWritable, MultiStringKeys, AvgWritable>{
+        @Override
+        protected void reduce(MultiStringKeys key, Iterable<AvgWritable> values, Context context) throws IOException, InterruptedException {
+            double count = 0;
+            int total = 0;
+            for(AvgWritable i : values){
+                count += i.getSomaValues();
+                total += i.getN();
+            }
+
+            context.write(key, new AvgWritable(count,total));
+        }
+    }
+
     public static class BackTransactionsReducer extends Reducer<MultiStringKeys, AvgWritable, MultiStringKeys, MultiStringKeys> {
-        //private boolean firstProcess = true;
         @Override
         protected void reduce(MultiStringKeys key, Iterable<AvgWritable> values, Context context) throws IOException, InterruptedException {
             double count = 0;
@@ -60,7 +76,6 @@ public class Exercicio5 {
             }
             double mean = count / total;
             context.write(key, new MultiStringKeys(Double.toString(max), Double.toString(min), Double.toString(mean)));
-            //firstProcess = true;
         }
     }
 }

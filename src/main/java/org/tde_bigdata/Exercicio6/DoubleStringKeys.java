@@ -1,6 +1,6 @@
-package TDE1.Exercicio6;
+package org.tde_bigdata.Exercicio6;
 
-import TDE1.GenericWritable;
+import org.tde_bigdata.GenericWritable;
 
 public class DoubleStringKeys extends GenericWritable {
 

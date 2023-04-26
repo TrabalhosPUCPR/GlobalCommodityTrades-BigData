@@ -1,6 +1,5 @@
 package org.tde_bigdata.Exercicio7;
 
-import com.sun.corba.se.spi.ior.ObjectKey;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -8,55 +7,130 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.tde_bigdata.Exercicio;
 import org.tde_bigdata.Exercicio2.StringDoubleKeys;
-import org.tde_bigdata.Exercicio5.AvgWritable;
-import org.tde_bigdata.Exercicio5.Exercicio5;
 import org.tde_bigdata.Exercicio5.MultiStringKeys;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-public class Exercicio7 {
+public class Exercicio7 implements Exercicio {
+    private Job job1, job2;
 
-    public static Job setupJob(Configuration c) throws IOException {
-        Job job = new Job(c, "Ex7");
-        Path output = new Path("output/outputEX7");
-        job.setJarByClass(Exercicio7.class);
-        job.setMapperClass(Exercicio7.Mapper1.class);
-
-        job.setReducerClass(Exercicio5.BackTransactionsReducer.class);
-
-        job.setMapOutputKeyClass(StringDoubleKeys.class);
-        job.setMapOutputValueClass(IntWritable.class);
-
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntWritable.class);
-
-        FileOutputFormat.setOutputPath(job, output);
-        return job;
+    public Exercicio7(Configuration c) throws IOException {
+        setupJob(c);
     }
 
-    public static class Mapper1 extends Mapper<Object, Text, StringDoubleKeys, IntWritable> {
+    public Job setupJob(Configuration c) throws IOException {
+        Path output = new Path("output/outputEX7");
+        Path outputIntermediate = new Path("output/intermediate/outputEX7");
+
+        job1 = new Job(c, "Ex7");
+        job1.setJarByClass(Exercicio7.class);
+
+        job1.setMapperClass(Mapper1.class);
+        job1.setCombinerClass(Combiner1.class);
+        job1.setReducerClass(Reducer1.class);
+
+        job1.setMapOutputKeyClass(MultiStringKeys.class);
+        job1.setMapOutputValueClass(IntWritable.class);
+        job1.setOutputKeyClass(Text.class);
+        job1.setOutputValueClass(IntWritable.class);
+
+        FileOutputFormat.setOutputPath(job1, outputIntermediate);
+
+        job2 = new Job(c);
+        job2.setJarByClass(Exercicio7.class);
+
+        job2.setMapperClass(Mapper2.class);
+        job2.setCombinerClass(Combiner2.class);
+        job2.setReducerClass(Reducer2.class);
+
+        job2.setMapOutputKeyClass(Text.class);
+        job2.setMapOutputValueClass(CommodityWritable.class);
+        job2.setOutputKeyClass(Text.class);
+        job2.setOutputValueClass(MultiStringKeys.class);
+
+        FileInputFormat.addInputPath(job2, outputIntermediate);
+        FileOutputFormat.setOutputPath(job2, output);
+        return null;
+    }
+
+    @Override
+    public void launch(Configuration c, Path input) throws IOException, InterruptedException, ClassNotFoundException {
+        FileInputFormat.addInputPath(job1, input);
+        job1.waitForCompletion(false);
+        job2.waitForCompletion(false);
+    }
+
+    public static class Mapper1 extends Mapper<Object, Text, MultiStringKeys, IntWritable> {
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            String[] fields = value.toString().split(";");
-            if(fields[0].equals("country_or_area")) return;
-            String year = fields[1];
-            if(!year.equals("2016")) return;
-            String commodityName = fields[3];
-            String flowType = fields[4];
-            context.write(new StringDoubleKeys(commodityName, flowType), new IntWritable(1));
+            String[] line = value.toString().split(";");
+            if(line[0].equals("country_or_area") || !line[1].equals("2016")) return;
+
+            String flow = line[4];
+            String commodity = line[3];
+            int quantity = (int) Double.parseDouble(line[8]);
+            MultiStringKeys writable = new MultiStringKeys(flow, commodity);
+            context.write(writable, new IntWritable(quantity));
         }
     }
 
-    public static class Reducer1b extends Reducer<StringDoubleKeys, IntWritable, Text, IntWritable> {
+    public static class Combiner1 extends Reducer<MultiStringKeys, IntWritable, MultiStringKeys, IntWritable>{
         @Override
-        protected void reduce(StringDoubleKeys key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+        protected void reduce(MultiStringKeys key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int count = 0;
             for(IntWritable i : values){
                 count += i.get();
             }
-            context.write(new Text(key.toString()), new IntWritable(count));
+            context.write(key, new IntWritable(count));
+        }
+    }
+
+    public static class Reducer1 extends Reducer<MultiStringKeys, IntWritable, MultiStringKeys, IntWritable> {
+        @Override
+        protected void reduce(MultiStringKeys key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            key.splitter = ";;;;;";
+            int quantity = values.iterator().next().get();
+            context.write(key,new IntWritable(quantity));
+        }
+    }
+
+    public static class Mapper2 extends Mapper<Object, Text, Text, CommodityWritable> {
+        @Override
+        protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String[] line = value.toString().split(";;;;;");
+            String flow = line[0];
+            String commodity = line[1];
+            int quantity = Integer.parseInt(line[2].replace("\t", ""));
+            context.write(new Text(flow), new CommodityWritable(commodity, quantity));
+        }
+    }
+
+    public static class Combiner2 extends Reducer<Text, CommodityWritable, Text, CommodityWritable>{
+        @Override
+        protected void reduce(Text key, Iterable<CommodityWritable> values, Context context) throws IOException, InterruptedException {
+            int max = Integer.MIN_VALUE;
+            CommodityWritable highestCommodity = null;
+            for(CommodityWritable cw : values){
+                int quantity = cw.getQuantity();
+                if(quantity > max){
+                    max = quantity;
+                    highestCommodity = new CommodityWritable(cw);
+                }
+            }
+            context.write(key, highestCommodity);
+        }
+    }
+
+    public static class Reducer2 extends Reducer<Text, CommodityWritable, Text, MultiStringKeys> {
+        @Override
+        protected void reduce(Text key, Iterable<CommodityWritable> values, Context context) throws IOException, InterruptedException {
+            CommodityWritable c = values.iterator().next();
+            context.write(key, new MultiStringKeys(" Name:", c.getCommodityName(), " Quantity:",String.valueOf(c.getQuantity())));
         }
     }
 }

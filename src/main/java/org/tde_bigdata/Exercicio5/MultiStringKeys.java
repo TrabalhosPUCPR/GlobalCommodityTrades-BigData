@@ -7,4 +7,5 @@ public class MultiStringKeys extends GenericWritable {
         super(string);
     }
     public MultiStringKeys(){}
+
 }
