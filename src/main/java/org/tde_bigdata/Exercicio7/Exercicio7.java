@@ -94,8 +94,11 @@ public class Exercicio7 implements Exercicio {
         @Override
         protected void reduce(MultiStringKeys key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             key.splitter = ";;;;;";
-            int quantity = values.iterator().next().get();
-            context.write(key,new IntWritable(quantity));
+            int quantity = 0;
+            for (IntWritable i : values){
+                quantity += i.get();
+            }
+            context.write(key, new IntWritable(quantity));
         }
     }
 
@@ -129,7 +132,15 @@ public class Exercicio7 implements Exercicio {
     public static class Reducer2 extends Reducer<Text, CommodityWritable, Text, MultiStringKeys> {
         @Override
         protected void reduce(Text key, Iterable<CommodityWritable> values, Context context) throws IOException, InterruptedException {
-            CommodityWritable c = values.iterator().next();
+            int max = Integer.MIN_VALUE;
+            CommodityWritable c = new CommodityWritable();
+            for(CommodityWritable cw : values){
+                int quantity = cw.getQuantity();
+                if(quantity > max){
+                    max = quantity;
+                    c = new CommodityWritable(cw);
+                }
+            }
             context.write(key, new MultiStringKeys(" Name:", c.getCommodityName(), " Quantity:",String.valueOf(c.getQuantity())));
         }
     }
