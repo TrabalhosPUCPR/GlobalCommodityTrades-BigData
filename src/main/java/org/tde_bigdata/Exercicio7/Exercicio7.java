@@ -68,12 +68,10 @@ public class Exercicio7 implements Exercicio {
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] line = value.toString().split(";");
             if(!line[1].equals("2016")) return; // if the year is not 2016, return, first line will be removed with this as well, since it will compare "2016" with "year"
-
             String flow = line[4];
             String commodity = line[3];
-            int quantity = (int) Double.parseDouble(line[8]);
             MultiStringKeys writable = new MultiStringKeys(flow, commodity); // custom writable for the flow and commodity to be used as the key
-            context.write(writable, new IntWritable(quantity));
+            context.write(writable, new IntWritable(1));
         }
     }
 
